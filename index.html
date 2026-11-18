@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Ma librairie</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 1000px; margin: auto; padding: 20px; }
+    #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; }
+    .card img { max-width: 100%; height: 200px; object-fit: contain; }
+  </style>
+</head>
+<body>
+  <h1>Ma librairie</h1>
+  <input id="search" placeholder="Rechercher un titre..." style="width:100%;padding:8px;margin-bottom:16px">
+  <div id="grid"></div>
+
+  <script>
+   const URL_SUPABASE = "https://ekezvssgchnniroqudsk.supabase.co";
+const CLE_ANON = "sb_publishable_tmWJnkrvFEMN7XTgxUk0JA_WLWMWsjG";
+const db = supabase.createClient(URL_SUPABASE, CLE_ANON);
+    async function charger(recherche = "") {
+      let q = db.from("books").select("*").order("titre");
+      if (recherche) q = q.ilike("titre", `%${recherche}%`);
+      const { data, error } = await q;
+      if (error) return console.error(error);
+
+         document.getElementById("grid").innerHTML = data.map(b => `
+      <a class="card" href="${b.url}" target="_blank" style="text-decoration:none;color:inherit">
+        <img src="${b.image}" alt="">
+        <h4>${b.titre}</h4>
+        <p>£${b.prix} · ${"★".repeat(b.note)}</p>
+      </a>`).join("");
+    }
+
+    document.getElementById("search").addEventListener("input", e => charger(e.target.value));
+    charger();
+  </script>
+</body>
+</html>
